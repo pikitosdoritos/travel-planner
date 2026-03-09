@@ -43,6 +43,10 @@ def delete_project(db: Session, project: models.TravelProject):
     db.delete(project)
     db.commit()
     
-def update_place_visit_state(db: Session, place: models.ProjectPlace, visited: bool):
+def update_place_visit_state(place: models.ProjectPlace, visited: bool):
     place.visited = visited
-    place.visited_at = datetime.now() if visited else None
+
+    if visited:
+        place.visited_at = datetime.utcnow()
+    else:
+        place.visited_at = None

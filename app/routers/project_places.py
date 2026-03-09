@@ -9,9 +9,9 @@ router = APIRouter(prefix="/projects/{project_id}/places", tags=["Project Places
 
 @router.post("", response_model=schemas.PlaceResponse, status_code=status.HTTP_201_CREATED)
 async def add_place_to_project(project_id: int, payload: schemas.PlaceCreate, db: Session = Depends(get_db)):
-    project = crud.get_project_or_404(db, project_id)
+    project = crud.get_project(db, project_id)
 
-    crud.ensure_project_can_accept_place(project)
+    crud.ensure_project_has_places(project)
     crud.ensure_no_duplicate_external_id(project, payload.external_id)
 
     artwork = await fetch_artwork_by_id(payload.external_id)
@@ -33,19 +33,19 @@ async def add_place_to_project(project_id: int, payload: schemas.PlaceCreate, db
 
 @router.get("", response_model=list[schemas.PlaceResponse])
 def list_project_places(project_id: int, db: Session = Depends(get_db)):
-    crud.get_project_or_404(db, project_id)
+    crud.get_project(db, project_id)
 
     return db.query(models.ProjectPlace).filter(models.ProjectPlace.project_id == project_id).order_by(models.ProjectPlace.id.desc()).all()
 
 
 @router.get("/{place_id}", response_model=schemas.PlaceResponse)
 def get_project_place(project_id: int, place_id: int, db: Session = Depends(get_db)):
-    return crud.get_project_place_or_404(db, project_id, place_id)
+    return crud.get_project_place(db, project_id, place_id)
 
 
 @router.patch("/{place_id}", response_model=schemas.PlaceResponse)
 def update_project_place(project_id: int, place_id: int, payload: schemas.PlaceUpdate, db: Session = Depends(get_db)):
-    place = crud.get_project_place_or_404(db, project_id, place_id)
+    place = crud.get_project_place(db, project_id, place_id)
 
     if payload.notes is not None:
         place.notes = payload.notes
@@ -56,7 +56,7 @@ def update_project_place(project_id: int, place_id: int, payload: schemas.PlaceU
     db.commit()
     db.refresh(place)
 
-    project = crud.get_project_or_404(db, project_id)
+    project = crud.get_project(db, project_id)
     crud.recalculate_project_completion(project)
     db.commit()
 

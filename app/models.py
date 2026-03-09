@@ -8,7 +8,7 @@ class TravelProject(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    desription = Column(Text, nullable=True)
+    description = Column(Text, nullable=True)
     start_date = Column(Date, nullable=False)
     is_completed = Column(Boolean, default=False,nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
@@ -28,5 +28,6 @@ class ProjectPlace(Base):
     visited = Column(Boolean, default=False, nullable=False)
     visited_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     
     project = relationship("TravelProject", back_populates="places")
